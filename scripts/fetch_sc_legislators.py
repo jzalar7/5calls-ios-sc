@@ -2,7 +2,7 @@
 import json
 import requests
 from bs4 import BeautifulSoup
-+import os
+import os
 
 BASE = "https://www.scstatehouse.gov/member.php?chamber={}"
 OUTPUT = "data/legislators.json"
@@ -31,9 +31,9 @@ def fetch_chamber(chamber: str):
     print(f"  • Found {len(members)} in chamber {chamber}")
     return members
 
-+def main():
-+    # Ensure the output directory exists
-+    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
+def main():
+   # Ensure the output directory exists
+    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     senators       = fetch_chamber("S")
     representatives = fetch_chamber("H")
 
