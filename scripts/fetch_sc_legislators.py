@@ -2,6 +2,7 @@
 import json
 import requests
 from bs4 import BeautifulSoup
++import os
 
 BASE = "https://www.scstatehouse.gov/member.php?chamber={}"
 OUTPUT = "data/legislators.json"
@@ -14,35 +15,30 @@ def fetch_chamber(chamber: str):
     soup = BeautifulSoup(resp.text, "html.parser")
 
     members = []
-    # headings like "District 1", "District 44", etc.
-    for heading in soup.find_all(lambda tag: tag.name in ("h1","h2","h3") 
-                                              and "District" in tag.get_text()):
+    for heading in soup.find_all(lambda tag: tag.name in ("h1","h2","h3") and "District" in tag.get_text()):
         district = heading.get_text(strip=True)
-
-        # the next link after that heading is the legislator’s name
         a = heading.find_next("a", href=lambda href: href and "member.php" in href)
         if not a:
             continue
         name = a.get_text(strip=True)
-
-        # right after the <a> text there’s a party in parentheses
         party_txt = a.next_sibling or ""
         party = party_txt.strip().strip("()")
-
         members.append({
             "name":     name,
             "district": district,
             "party":    party
         })
-
     print(f"  • Found {len(members)} in chamber {chamber}")
     return members
 
-def main():
++def main():
++    # Ensure the output directory exists
++    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     senators       = fetch_chamber("S")
     representatives = fetch_chamber("H")
 
     all_reps = senators + representatives
+
     with open(OUTPUT, "w", encoding="utf-8") as f:
         json.dump(all_reps, f, indent=2, ensure_ascii=False)
 
