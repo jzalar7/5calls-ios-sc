@@ -1,0 +1,31 @@
+name: Update SC Legislators
+
+on:
+  schedule:
+    - cron: '0 5 * * 0'       # every Sunday at 05:00 UTC
+  workflow_dispatch:         # also manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run scraper
+        run: python3 scripts/fetch_sc_legislators.py
+
+      - name: Commit updated JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add data/legislators.json
+          git diff --quiet --cached || git commit -m "Weekly SC legislators update"
+          git push
